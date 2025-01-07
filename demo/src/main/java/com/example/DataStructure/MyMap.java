@@ -1,5 +1,7 @@
 package com.example.DataStructure;
 
+import java.util.Collection;
+
 public class MyMap<K, V> {
     private MyHashTable<K, V> hashTable;
 
@@ -27,7 +29,7 @@ public class MyMap<K, V> {
         return hashTable.containsKey(value);
     }
 
-    public Iterable<V> values() {
+    public Collection<V> values() {
         return hashTable.values();
     }
 }

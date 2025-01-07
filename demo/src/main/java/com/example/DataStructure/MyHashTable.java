@@ -1,7 +1,9 @@
 package com.example.DataStructure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class MyHashTable<K, V> {
     private static final int DEFAULT_CAPACITY = 16;
@@ -67,8 +69,8 @@ public class MyHashTable<K, V> {
         return size;
     }
 
-    public Iterable<V> values() {
-        MyLinkedList<V> values = new MyLinkedList<>();
+    public Collection<V> values() {
+        List<V> values = new ArrayList<>();
         for (MyLinkedList<KeyValue<K, V>> list : table) {
             if (list != null) {
                 for (KeyValue<K, V> keyValue : list) {
@@ -77,7 +79,7 @@ public class MyHashTable<K, V> {
             }
         }
 
-        return values();
+        return values;
     }
 
     private int findBucketNumber(K key) {
