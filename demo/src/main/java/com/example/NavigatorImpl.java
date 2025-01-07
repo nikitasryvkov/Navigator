@@ -1,6 +1,15 @@
 package com.example;
 
+import com.example.DataStructure.MyMap;
+
 public class NavigatorImpl implements Navigator {
+    private MyMap<String, Route> routes;
+    private MyMap<String, Route> favoriteRoutes;
+
+    public NavigatorImpl() {
+        this.routes = new MyMap<>();
+        this.favoriteRoutes = new MyMap<>();
+    }
 
     @Override
     public void addRoute(Route route) {
@@ -16,26 +25,26 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public boolean contains(String route) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'contains'");
+        return routes.contains(route);
     }
 
     @Override
     public int size() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'size'");
+        return routes.size();
     }
 
     @Override
     public Route getRoute(String routeId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRoute'");
+        return routes.get(routeId);
     }
 
     @Override
     public void chooseRoute(String routeId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'chooseRoute'");
+        Route route = routes.get(routeId);
+
+        if (route != null) {
+            route.addPopularity();
+        }
     }
 
     @Override
