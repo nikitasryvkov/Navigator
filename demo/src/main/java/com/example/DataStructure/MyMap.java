@@ -1,9 +1,9 @@
 package com.example.DataStructure;
 
-public class Map<K, V> {
+public class MyMap<K, V> {
     private MyHashTable<K, V> hashTable;
 
-    public Map() {
+    public MyMap() {
         this.hashTable = new MyHashTable<>();
     }
 
