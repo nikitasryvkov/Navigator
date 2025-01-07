@@ -1,5 +1,10 @@
 package com.example;
 
+import java.util.stream.Collectors;
+
+import com.example.Comparators.RouteComparator;
+import com.example.Comparators.RouteComparatorSearch;
+import com.example.Comparators.Top3Comparator;
 import com.example.DataStructure.MyMap;
 
 public class NavigatorImpl implements Navigator {
@@ -13,14 +18,27 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public void addRoute(Route route) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addRoute'");
+        for (Route requiredRote : routes.values()) {
+            if (checkRepeat(requiredRote, route)) {
+                return;
+            }
+        }
+
+        routes.put(route.getId(), route);
+        if (route.isFavorite()) {
+            favoriteRoutes.put(route.getId(), route);
+        }
     }
 
     @Override
     public Route removeRoute(String routeId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'removeRoute'");
+        Route removeRoute = routes.remove(routeId);
+
+        if (removeRoute.isFavorite()) {
+            favoriteRoutes.remove(routeId);
+        }
+
+        return removeRoute;
     }
 
     @Override
@@ -49,26 +67,39 @@ public class NavigatorImpl implements Navigator {
 
     @Override
     public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'searchRoutes'");
+        return routes.values()
+                .stream()
+                .filter(route -> route.hasLogicalOrder(startPoint, endPoint))
+                .sorted(new RouteComparatorSearch(startPoint, endPoint))
+                .collect(Collectors.toList());
+
     }
 
     @Override
     public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getFavoriteRoutes'");
+        return routes.values()
+                .stream()
+                .filter(route -> route.isFavorite() && route.getLocationPoints().indexOf(destinationPoint) > 0)
+                .sorted(new RouteComparator(destinationPoint))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Iterable<Route> getTop3Routes() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTop3Routes'");
+        return routes.values()
+                .stream()
+                .sorted(new Top3Comparator())
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void setFavorite(String routeId, boolean isFavorite) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setFavorite'");
+
     }
 
+    private boolean checkRepeat(Route requiredRote, Route route) {
+        return Double.compare(requiredRote.getDistance(), route.getDistance()) == 0
+                && requiredRote.getLocationPoints().equals(route.getLocationPoints());
+    }
 }

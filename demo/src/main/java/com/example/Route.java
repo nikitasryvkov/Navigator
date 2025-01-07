@@ -54,32 +54,30 @@ public class Route {
         popularity++;
     }
 
-    // public boolean hasLogicalOrder(String startPoint, String endPoint) {
-    // if (locationPoints == null || locationPoints.size() < 2) {
-    // // Handle the case where the route does not have enough points
-    // return false;
-    // }
+    public boolean hasLogicalOrder(String startPoint, String endPoint) {
+        if (locationPoints == null || locationPoints.size() < 2) {
+            return false;
+        }
 
-    // int startIndex = locationPoints.indexOf(startPoint);
-    // int endIndex = locationPoints.indexOf(endPoint);
+        int startIndex = locationPoints.indexOf(startPoint);
+        int endIndex = locationPoints.indexOf(endPoint);
 
-    // // Check if the points are in a logical order
-    // return startIndex != -1 && endIndex != -1 && startIndex < endIndex;
-    // }
+        return startIndex != -1 && endIndex != -1 && startIndex < endIndex;
+    }
 
-    // public int getLogicalOrderDistance() {
-    // // Placeholder logic: Return the difference between the indices of the first
-    // two points
-    // if (locationPoints == null || locationPoints.size() < 2) {
-    // // Handle the case where the route does not have enough points
-    // return 0;
-    // }
+    public int getLogicalOrderDistance() {
+        if (locationPoints == null || locationPoints.size() < 2) {
+            return 0;
+        }
 
-    // int indexFirstPoint = locationPoints.indexOf(locationPoints.indexOf(0));
-    // int indexSecondPoint = locationPoints.indexOf(locationPoints.indexOf(1));
+        // int indexFirstPoint = locationPoints.indexOf(locationPoints.indexOf(0));
+        // int indexSecondPoint = locationPoints.indexOf(locationPoints.indexOf(1));
 
-    // return indexSecondPoint - indexFirstPoint;
-    // }
+        int indexFirstPoint = 0;
+        int indexSecondPoint = locationPoints.size() - 1;
+
+        return indexSecondPoint - indexFirstPoint;
+    }
 
     @Override
     public boolean equals(Object obj) {
