@@ -1,24 +1,23 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
+
+import com.example.DataStructure.MyArrayList;
+import com.example.DataStructure.MyList;
 
 public class Main {
     private static final Navigator navigator = new NavigatorImpl();
-    private static final List<String> availablePoints = new ArrayList<>();
-    // test
+    private static final MyList<String> availablePoints = new MyArrayList<>();
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
 
         populateRoutes();
-        Scanner scanner = new Scanner(System.in);
 
         int choice;
         do {
             printMenu();
-            System.out.print("Enter your choice: ");
+            System.out.print("Выберете пункт меню: ");
             choice = scanner.nextInt();
             scanner.nextLine();
 
@@ -57,204 +56,255 @@ public class Main {
                     exit();
                     break;
                 default:
-                    System.out.println("Invalid choice. Please try again.");
+                    System.out.println("Неверный выбор. Попробуйте снова.");
             }
         } while (choice != 11);
     }
 
     private static void printMenu() {
-        System.out.println("===== Navigation System =====");
-        System.out.println("1. Add Route");
-        System.out.println("2. Remove Route");
-        System.out.println("3. Check if Route exists");
-        System.out.println("4. Display Number of Routes");
-        System.out.println("5. Display Route by ID");
-        System.out.println("6. Choose Route");
-        System.out.println("7. Search Routes");
-        System.out.println("8. Display Available Points");
-        System.out.println("9. Get Favorite Routes by Destination");
-        System.out.println("10. Get Top 3 Routes");
-        System.out.println("11. Exit");
+        System.out.println("===== Система Навигации =====");
+        System.out.println("1. Добавить маршрут");
+        System.out.println("2. Удалить маршрут");
+        System.out.println("3. Проверить наличие маршрута");
+        System.out.println("4. Отобразить количество маршрутов");
+        System.out.println("5. Отобразить маршрут по ID");
+        System.out.println("6. Выбрать маршрут");
+        System.out.println("7. Поиск маршрутов");
+        System.out.println("8. Отобразить доступные точки");
+        System.out.println("9. Получить избранные маршруты по пункту назначения");
+        System.out.println("10. Получить топ-3 маршрутов");
+        System.out.println("11. Выйти");
     }
 
     private static void addRoute() {
-        Route route = new Route();
-
-        System.out.print("Enter route ID: ");
-        String routeId = new Scanner(System.in).nextLine();
-        route.setId(routeId);
-
         displayAvailablePoints();
 
-        List<String> routePoints = new ArrayList<>();
-        System.out.print("Enter route points (comma-separated, e.g., Point A, Point B): ");
-        String pointsInput = new Scanner(System.in).nextLine();
+        MyList<String> routePoints = new MyArrayList<>();
+        System.out.print("Введите точки маршрута (через запятую, например, Точка A, Точка B): ");
+        String pointsInput = scanner.nextLine();
         String[] pointsArray = pointsInput.split(",");
         for (String point : pointsArray) {
             String trimmedPoint = point.trim();
             routePoints.add(trimmedPoint);
             availablePoints.add(trimmedPoint);
         }
-        System.out.print("Enter distance: ");
-        double distance = new Scanner(System.in).nextDouble();
-        route.setDistance(distance);
 
-        System.out.print("Enter popularity: ");
-        int popularity = new Scanner(System.in).nextInt();
-        route.setPopularity(popularity);
+        System.out.print("Введите расстояние: ");
+        double distance = scanner.nextDouble();
 
-        System.out.print("Is it a favorite route? (true/false): ");
-        boolean isFavorite = new Scanner(System.in).nextBoolean();
-        route.setFavorite(isFavorite);
+        System.out.print("Введите популярность маршрута: ");
+        int popularity = scanner.nextInt();
 
-        route.setLocationPoints(routePoints);
+        System.out.print("Это избранный маршрут? (true/false): ");
+        boolean isFavorite = scanner.nextBoolean();
+
+        Route route = new Route(distance, popularity, isFavorite, routePoints);
 
         navigator.addRoute(route);
-        System.out.println("Route added successfully!");
+
+        if (navigator.contains(route)) {
+            System.out.println("Маршрут успешно добавлен!");
+        } else {
+            System.out.println("Во время добавления возникла ошибка!");
+        }
     }
 
     private static void removeRoute() {
-        System.out.print("Enter the route ID to remove: ");
-        String routeId = new Scanner(System.in).nextLine();
+        System.out.print("Введите ID маршрута для удаления: ");
+        String routeId = scanner.nextLine();
 
-        Route removedRoute = navigator.removeRoute(routeId);
-        if (removedRoute != null) {
-            System.out.println("Route removed successfully: " + removedRoute.getId());
+        Route route = navigator.getRoute(routeId);
+
+        if (navigator.contains(route)) {
+            navigator.removeRoute(routeId);
+            System.out.println("Маршрут успешно удалён: " + route.getId());
         } else {
-            System.out.println("Route not found!");
+            System.out.println("Маршрут не найден!");
         }
     }
 
     private static void checkContains() {
-        System.out.print("Enter the route ID to check: ");
-        String routeId = new Scanner(System.in).nextLine();
+        System.out.print("Введите ID маршрута для проверки: ");
+        String routeId = scanner.nextLine();
+        Route route = navigator.getRoute(routeId);
 
-        boolean contains = navigator.contains(routeId);
-        System.out.println("Contains Route: " + contains);
+        boolean contains = navigator.contains(route);
+        System.out.println("Маршрут найден: " + contains);
     }
 
     private static void displaySize() {
         int size = navigator.size();
-        System.out.println("Number of Routes: " + size);
+        System.out.println("Количество маршрутов: " + size);
     }
 
     private static void displayRouteById() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Enter the route ID to display: ");
+        System.out.print("Введите ID маршрута для отображения: ");
         String routeId = scanner.nextLine();
 
         Route route = navigator.getRoute(routeId);
         if (route != null) {
-            System.out.println("Route Details: " + route.getId() + ", Distance: " + route.getDistance()
-                    + ", Popularity: " + route.getPopularity());
+            System.out.println("Детали маршрута: " + route.getId() + ", Расстояние: " +
+                    route.getDistance() + ", Популярность: " + route.getPopularity());
 
-            System.out.print("Do you want to change this route as favorite? (yes/no): ");
+            displayRoute("Детали маршрута", route);
+
+            System.out.print("Вы хотите изменить статус маршрута на избранный? (да/нет): ");
             String input = scanner.nextLine();
 
-            if ("yes".equalsIgnoreCase(input.trim())) {
-                System.out.print("Do you want to set this route as favorite? (true/false): ");
-
-                // Считываем введенное значение как boolean
+            if ("да".equalsIgnoreCase(input.trim())) {
+                System.out.print("Установить маршрут как избранный? (true/false): ");
                 boolean isFavorite = scanner.nextBoolean();
                 navigator.setFavorite(route.getId(), isFavorite);
-                System.out.println("Route set as new position isFavorite.");
+                System.out.println("Статус маршрута обновлён.");
             } else {
-                System.out.println("Route not changed");
+                System.out.println("Маршрут остался без изменений.");
             }
         } else {
-            System.out.println("Route not found!");
+            System.out.println("Маршрут не найден!");
         }
     }
 
     private static void chooseRoute() {
-        System.out.print("Enter the route ID to choose: ");
-        String routeId = new Scanner(System.in).nextLine();
+        System.out.print("Введите ID маршрута для выбора: ");
+        String routeId = scanner.nextLine();
 
         navigator.chooseRoute(routeId);
-        System.out.println("Route chosen successfully!");
+        System.out.println("Маршрут успешно выбран!");
     }
 
     private static void searchRoutes() {
-        System.out.print("Enter the starting point: ");
-        String startPoint = new Scanner(System.in).nextLine();
+        System.out.print("Введите начальную точку: ");
+        String startPoint = scanner.nextLine();
 
-        System.out.print("Enter the ending point: ");
-        String endPoint = new Scanner(System.in).nextLine();
+        System.out.print("Введите конечную точку: ");
+        String endPoint = scanner.nextLine();
 
         Iterable<Route> routes = navigator.searchRoutes(startPoint, endPoint);
-        System.out.println("Search Results:");
+        System.out.println("Результаты поиска:");
         for (Route route : routes) {
-            System.out.println("Route: " + route.getId() + ", Distance: " + route.getDistance() + ", Popularity: "
-                    + route.getPopularity() + ", Location Points: " + route.getLocationPoints());
+            System.out.println("Маршрут: " + route.getId() + ", Расстояние: " +
+                    route.getDistance() + ", Популярность: "
+                    + route.getPopularity() + ", Точки маршрута: " + route.getLocationPoints() + ", Избранный маршрут: "
+                    + route.isFavorite());
         }
     }
 
     private static void displayAvailablePoints() {
-        System.out.println("Available Points: " + availablePoints);
+        System.out.println("Доступные точки: " + availablePoints);
     }
 
     private static void exit() {
-        System.out.println("Exiting Navigation System. Goodbye!");
+        System.out.println("Выход из системы навигации. До свидания!");
     }
 
     private static void populateRoutes() {
-        Route route1 = new Route();
-        route1.setId("R1");
-        route1.setDistance(450.0);
-        route1.setPopularity(8);
-        route1.setFavorite(true);
-
-        Route route2 = new Route();
-        route2.setId("R2");
-        route2.setDistance(300.0);
-        route2.setPopularity(5);
-        route2.setFavorite(false);
-
-        Route route3 = new Route();
-        route3.setId("R3");
-        route3.setDistance(700.0);
-        route3.setPopularity(9);
-        route3.setFavorite(true);
-
-        Route route4 = new Route();
-        route4.setId("R4");
-        route4.setDistance(1000.0);
-        route4.setPopularity(9);
-        route4.setFavorite(false);
-
-        route1.setLocationPoints(Arrays.asList("New York", "Philadelphia", "Washington D.C."));
-        route4.setLocationPoints(Arrays.asList("New York", "Washington D.C."));
-        route2.setLocationPoints(Arrays.asList("New York", "Boston", "Portland"));
-        route3.setLocationPoints(Arrays.asList("Philadelphia", "Washington D.C.", "Richmond"));
+        Route route1 = new Route(100.0, 8, true, new MyArrayList<>("A", "C", "Q"));
+        Route route2 = new Route(110.0, 8, true, new MyArrayList<>("A", "B", "C", "W"));
+        Route route3 = new Route(120.0, 9, true, new MyArrayList<>("A", "B", "W", "C", "E"));
+        Route route4 = new Route(600.0, 10, false, new MyArrayList<>("A", "C", "R"));
+        Route route5 = new Route(650.0, 10, false, new MyArrayList<>("A", "B", "C", "T"));
+        Route route6 = new Route(700.0, 8, true, new MyArrayList<>("J", "B", "U"));
+        Route route7 = new Route(1000.0, 9, false, new MyArrayList<>("A", "B", "C", "I", "Y", "P", "O"));
+        Route route8 = new Route(1100.0, 9, true, new MyArrayList<>("A", "B", "P"));
+        Route route9 = new Route(1200.0, 11, false, new MyArrayList<>("O", "B", "C", "Y", "F", "H"));
+        Route route10 = new Route(3000.0, 11, false, new MyArrayList<>("L", "B", "C"));
+        Route route11 = new Route(3000.0, 11, false, new MyArrayList<>("L", "B", "Q"));
+        Route route12 = new Route(3000.0, 11, false, new MyArrayList<>("L", "B", "Q", "B", "Q", "H"));
+        Route route13 = new Route(1100.0, 15, true, new MyArrayList<>("O", "A", "B"));
+        Route route14 = new Route(1100.0, 9, true, new MyArrayList<>("E", "B", "P"));
+        Route route15 = new Route(120.0, 10, true, new MyArrayList<>("J", "A", "W", "F", "C"));
+        Route route16 = new Route(120.0, 10, true, new MyArrayList<>("M", "A", "W", "U", "C"));
+        Route route17 = new Route(650.0, 8, false, new MyArrayList<>("A", "B", "C", "N"));
+        Route route18 = new Route(650.0, 8, false, new MyArrayList<>("A", "B", "C", "M"));
+        Route route19 = new Route(650.0, 8, false, new MyArrayList<>("A", "B", "C", "X"));
+        Route route20 = new Route(120.0, 10, true, new MyArrayList<>("X", "A", "W", "U", "C"));
 
         navigator.addRoute(route1);
         navigator.addRoute(route2);
         navigator.addRoute(route3);
         navigator.addRoute(route4);
+        navigator.addRoute(route5);
+        navigator.addRoute(route6);
+        navigator.addRoute(route7);
+        navigator.addRoute(route8);
+        navigator.addRoute(route9);
+        navigator.addRoute(route10);
+        navigator.addRoute(route11);
+        navigator.addRoute(route12);
+        navigator.addRoute(route13);
+        navigator.addRoute(route14);
+        navigator.addRoute(route16);
+        navigator.addRoute(route15);
+        navigator.addRoute(route17);
+        navigator.addRoute(route19);
+        navigator.addRoute(route20);
+        navigator.addRoute(route18);
 
         availablePoints
-                .addAll(Arrays.asList("New York", "Philadelphia", "Washington D.C.", "Boston", "Portland", "Richmond"));
+                .addAll(MyList.of("A", "B", "C", "D", "Q", "W", "E", "R", "T", "J", "U", "I", "Y", "O", "P", "F", "H",
+                        "L", "N", "M", "X"));
     }
 
     private static void getFavoriteRoutesByDestination() {
-        System.out.print("Enter the destination point: ");
-        String destinationPoint = new Scanner(System.in).nextLine();
+        System.out.print("Введите пункт назначения: ");
+        String destinationPoint = scanner.nextLine();
 
         Iterable<Route> favoriteRoutes = navigator.getFavoriteRoutes(destinationPoint);
-        displayRoutes("Favorite Routes by Destination", favoriteRoutes);
+        displayRoutes("Любимые маршруты по пунктам назначения", favoriteRoutes);
     }
 
     private static void getTop3Routes() {
         Iterable<Route> top3Routes = navigator.getTop3Routes();
-        displayRoutes("Top 3 Routes", top3Routes);
+        displayRoutes("Топ 3 маршрутов", top3Routes);
     }
 
     private static void displayRoutes(String title, Iterable<Route> routes) {
         System.out.println(title + ":");
         for (Route route : routes) {
-            System.out.println("Route: " + route.getId() + ", Distance: " + route.getDistance() + ", Popularity: "
-                    + route.getPopularity() + ", Location Points: " + route.getLocationPoints());
+            System.out.println("Маршрут: " + route.getId() + ", Дистанция: " +
+                    route.getDistance() + ", Популярность: "
+                    + route.getPopularity() + ", Точки маршрута: " + route.getLocationPoints() +
+                    ", Избранный: "
+                    + route.isFavorite());
         }
     }
+
+    private static void displayRoute(String title, Route route) {
+        System.out.println("=========================================");
+        System.out.println("            " + title.toUpperCase());
+        System.out.println("=========================================");
+
+        System.out.println("-----------------------------------------");
+        System.out.printf("Маршрут #%s\n", route.getId());
+        System.out.printf("ID: %s\n", route.getId());
+        System.out.printf("Дистанция: %.2f км\n", route.getDistance());
+        System.out.printf("Популярность: %d\n", route.getPopularity());
+        System.out.printf("Точки маршрута: %s\n", route.getLocationPoints());
+        System.out.printf("Избранный: %s\n", route.isFavorite() ? "Да" : "Нет");
+
+        System.out.println("=========================================");
+    }
+
+    // private static void displayRoutes(String title, Iterable<Route> routes) {
+    // System.out.println("=========================================");
+    // System.out.println(" " + title.toUpperCase());
+    // System.out.println("=========================================");
+
+    // int index = 1;
+    // for (Route route : routes) {
+    // System.out.println("-----------------------------------------");
+    // System.out.printf("Маршрут #%d\n", index++);
+    // System.out.printf("ID: %s\n", route.getId());
+    // System.out.printf("Дистанция: %.2f км\n", route.getDistance());
+    // System.out.printf("Популярность: %d\n", route.getPopularity());
+    // System.out.printf("Точки маршрута: %s\n", route.getLocationPoints());
+    // System.out.printf("Избранный: %s\n", route.isFavorite() ? "Да" : "Нет");
+    // }
+
+    // if (index == 1) {
+    // System.out.println("Нет доступных маршрутов для отображения.");
+    // }
+
+    // System.out.println("=========================================");
+    // }
 }
