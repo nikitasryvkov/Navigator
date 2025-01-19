@@ -1,11 +1,8 @@
 package com.example.DataStructure;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
-public class MyHashTable<K, V> {
+public class MyHashTable<K, V> implements MyMap<K, V> {
     private static final int DEFAULT_CAPACITY = 16;
     private static final double LOAD_FACTOR = 0.75;
     private MyLinkedList<KeyValue<K, V>>[] table;
@@ -18,7 +15,8 @@ public class MyHashTable<K, V> {
         this.capacity = DEFAULT_CAPACITY;
     }
 
-    public void add(K key, V value) {
+    @Override
+    public void put(K key, V value) {
         growIfNeeded();
 
         int bucketNumber = findBucketNumber(key);
@@ -26,10 +24,11 @@ public class MyHashTable<K, V> {
             table[bucketNumber] = new MyLinkedList<>();
         }
 
-        table[bucketNumber].add(new KeyValue<>(key, value));
+        table[bucketNumber].add(new KeyValue<>(key, value, size));
         size++;
     }
 
+    @Override
     public V remove(K key) {
         int bucketNumber = findBucketNumber(key);
         MyLinkedList<KeyValue<K, V>> requiredBucket = table[bucketNumber];
@@ -48,6 +47,7 @@ public class MyHashTable<K, V> {
         return null;
     }
 
+    @Override
     public V get(K key) {
         int bucketNumber = findBucketNumber(key);
         MyLinkedList<KeyValue<K, V>> requiredBucket = table[bucketNumber];
@@ -61,29 +61,66 @@ public class MyHashTable<K, V> {
         return null;
     }
 
+    public int getOrder(K key) {
+        return this.find(key).getEntryOrder();
+    }
+
+    public KeyValue<K, V> find(K key) {
+        int bucketNumber = findBucketNumber(key);
+        MyLinkedList<KeyValue<K, V>> requiredBucket = table[bucketNumber];
+
+        for (KeyValue<K, V> keyValue : requiredBucket) {
+            if (keyValue.getKey().equals(key)) {
+                return keyValue;
+            }
+        }
+
+        return null;
+    }
+
     public boolean containsKey(K key) {
         return get(key) != null;
     }
 
+    @Override
     public int size() {
         return size;
     }
 
-    public Collection<V> values() {
-        List<V> values = new ArrayList<>();
-        for (MyLinkedList<KeyValue<K, V>> list : table) {
-            if (list != null) {
-                for (KeyValue<K, V> keyValue : list) {
-                    values.add(keyValue.getValue());
-                }
-            }
-        }
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
-        return values;
+    @Override
+    public Iterable<V> values() {
+        return () -> new Iterator<>() {
+            int bucketIndex = 0;
+            Iterator<KeyValue<K, V>> entryIterator = (table[0] == null) ? null : table[0].iterator();
+
+            @Override
+            public boolean hasNext() {
+                while (bucketIndex < table.length && (entryIterator == null || !entryIterator.hasNext())) {
+                    bucketIndex++;
+                    if (bucketIndex < table.length) {
+                        entryIterator = (table[bucketIndex] == null) ? null : table[bucketIndex].iterator();
+                    }
+                }
+                return entryIterator != null && entryIterator.hasNext();
+            }
+
+            @Override
+            public V next() {
+                if (!hasNext()) {
+                    throw new IllegalStateException("No more elements");
+                }
+                return entryIterator.next().getValue();
+            }
+        };
     }
 
     private int findBucketNumber(K key) {
-        return key.hashCode() % capacity;
+        return Math.abs(key.hashCode()) % capacity;
     }
 
     private void growIfNeeded() {
@@ -110,5 +147,32 @@ public class MyHashTable<K, V> {
         }
 
         table = newTable;
+    }
+
+    @Override
+    public boolean contains(K key) {
+        int index = findBucketNumber(key);
+        MyLinkedList<KeyValue<K, V>> bucket = table[index];
+
+        for (KeyValue<K, V> keyValue : bucket) {
+            if (keyValue.getKey().equals(key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean containsValue(V value) {
+        for (MyLinkedList<KeyValue<K, V>> bucket : table) {
+            for (KeyValue<K, V> keyValue : bucket) {
+                if (keyValue.getValue().equals(value)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

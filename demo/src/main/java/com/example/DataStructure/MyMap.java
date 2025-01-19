@@ -1,35 +1,23 @@
 package com.example.DataStructure;
 
-import java.util.Collection;
+public interface MyMap<K, V> {
+    void put(K key, V value);
 
-public class MyMap<K, V> {
-    private MyHashTable<K, V> hashTable;
+    V get(K key);
 
-    public MyMap() {
-        this.hashTable = new MyHashTable<>();
-    }
+    V remove(K key);
 
-    public void put(K key, V value) {
-        hashTable.add(key, value);
-    }
+    int size();
 
-    public V get(K key) {
-        return hashTable.remove(key);
-    }
+    boolean contains(K value);
 
-    public V remove(K key) {
-        return hashTable.remove(key);
-    }
+    boolean isEmpty();
 
-    public int size() {
-        return hashTable.size();
-    }
+    Iterable<V> values();
 
-    public boolean contains(K value) {
-        return hashTable.containsKey(value);
-    }
+    boolean containsKey(K key);
 
-    public Collection<V> values() {
-        return hashTable.values();
-    }
+    boolean containsValue(V value);
+
+    int getOrder(K key);
 }
