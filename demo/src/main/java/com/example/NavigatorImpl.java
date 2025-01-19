@@ -1,105 +1,125 @@
 package com.example;
 
-import java.util.stream.Collectors;
-
 import com.example.Comparators.RouteComparator;
 import com.example.Comparators.RouteComparatorSearch;
 import com.example.Comparators.Top3Comparator;
+import com.example.DataStructure.MyArrayList;
+import com.example.DataStructure.MyHashTable;
+import com.example.DataStructure.MyList;
 import com.example.DataStructure.MyMap;
 
 public class NavigatorImpl implements Navigator {
-    private MyMap<String, Route> routes;
-    private MyMap<String, Route> favoriteRoutes;
-
-    public NavigatorImpl() {
-        this.routes = new MyMap<>();
-        this.favoriteRoutes = new MyMap<>();
-    }
+    MyMap<String, Route> map = new MyHashTable<>();
 
     @Override
     public void addRoute(Route route) {
-        for (Route requiredRote : routes.values()) {
+        for (Route requiredRote : map.values()) {
             if (checkRepeat(requiredRote, route)) {
+                System.out.println("Такой маршрут уже есть!");
+
                 return;
             }
         }
 
-        routes.put(route.getId(), route);
-        if (route.isFavorite()) {
-            favoriteRoutes.put(route.getId(), route);
-        }
+        map.put(route.getId(), route);
     }
 
     @Override
-    public Route removeRoute(String routeId) {
-        Route removeRoute = routes.remove(routeId);
-
-        if (removeRoute.isFavorite()) {
-            favoriteRoutes.remove(routeId);
-        }
-
-        return removeRoute;
+    public void removeRoute(String routeId) {
+        map.remove(routeId);
     }
 
     @Override
-    public boolean contains(String route) {
-        return routes.contains(route);
+    public boolean contains(Route route) {
+        for (Route r : map.values()) {
+            if (r.equals(route))
+                return true;
+        }
+        return false;
     }
 
     @Override
     public int size() {
-        return routes.size();
+        return map.size();
     }
 
     @Override
     public Route getRoute(String routeId) {
-        return routes.get(routeId);
+        return map.get(routeId);
     }
 
     @Override
     public void chooseRoute(String routeId) {
-        Route route = routes.get(routeId);
-
+        Route route = map.get(routeId);
         if (route != null) {
             route.addPopularity();
+            ;
         }
     }
 
     @Override
     public Iterable<Route> searchRoutes(String startPoint, String endPoint) {
-        return routes.values()
-                .stream()
-                .filter(route -> route.hasLogicalOrder(startPoint, endPoint))
-                .sorted(new RouteComparatorSearch(startPoint, endPoint))
-                .collect(Collectors.toList());
+        MyList<Route> result = new MyArrayList<>();
 
+        for (Route route : map.values()) {
+            if (route.isLogical(route, startPoint, endPoint)) {
+                result.add(route);
+            }
+        }
+
+        result.sort(new RouteComparatorSearch(startPoint, endPoint, map));
+        return result;
     }
 
     @Override
     public Iterable<Route> getFavoriteRoutes(String destinationPoint) {
-        return routes.values()
-                .stream()
-                .filter(route -> route.isFavorite() && route.getLocationPoints().indexOf(destinationPoint) > 0)
-                .sorted(new RouteComparator(destinationPoint))
-                .collect(Collectors.toList());
+        MyList<Route> result = new MyArrayList<>();
+
+        for (Route route : map.values()) {
+            if (route.isFavorite()) {
+                for (String point : route.getLocationPoints()) {
+                    if (point.equals(destinationPoint) &&
+                            !route.getLocationPoints().get(0).equals(point)) {
+                        result.add(route);
+                        break;
+                    }
+                }
+            }
+        }
+
+        result.sort(new RouteComparator(map));
+        return result;
     }
 
     @Override
     public Iterable<Route> getTop3Routes() {
-        return routes.values()
-                .stream()
-                .sorted(new Top3Comparator())
-                .limit(5)
-                .collect(Collectors.toList());
+        MyList<Route> result = new MyArrayList<>();
+
+        for (Route route : map.values()) {
+            result.add(route);
+        }
+
+        result.sort(new Top3Comparator(map));
+
+        return result.subList(0, Math.min(5, result.size()));
     }
 
     @Override
     public void setFavorite(String routeId, boolean isFavorite) {
-
+        Route route = map.get(routeId);
+        if (route != null) {
+            System.out.println("Изменение статуса маршрута с ID: " + routeId + " на " + isFavorite);
+            route.setFavorite(isFavorite);
+        } else {
+            System.out.println("Маршрут не найден!");
+        }
     }
 
     private boolean checkRepeat(Route requiredRote, Route route) {
-        return Double.compare(requiredRote.getDistance(), route.getDistance()) == 0
-                && requiredRote.getLocationPoints().equals(route.getLocationPoints());
+        return requiredRote.getId().equals(route.getId()) &&
+                Double.compare(requiredRote.getDistance(), route.getDistance()) == 0
+                && requiredRote.getLocationPoints().get(0).equals(route.getLocationPoints().get(0))
+                && requiredRote.getLocationPoints().get(requiredRote.getLocationPoints().size() - 1)
+                        .equals(route.getLocationPoints().get(route.getLocationPoints().size() - 1));
     }
 }

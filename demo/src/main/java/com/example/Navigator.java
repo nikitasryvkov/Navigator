@@ -3,9 +3,9 @@ package com.example;
 public interface Navigator {
     void addRoute(Route route);
 
-    Route removeRoute(String routeId);
+    void removeRoute(String routeId);
 
-    boolean contains(String route);
+    boolean contains(Route route);
 
     int size();
 

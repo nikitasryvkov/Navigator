@@ -1,14 +1,23 @@
 package com.example;
 
-import java.util.List;
 import java.util.Objects;
+
+import com.example.DataStructure.MyList;
 
 public class Route {
     private String id;
     private double distance;
     private int popularity;
     private boolean isFavorite;
-    private List<String> locationPoints;
+    private MyList<String> locationPoints;
+
+    public Route(Double distance, Integer popularity, Boolean isFavorite, MyList<String> locationPoints) {
+        this.id = distance + locationPoints.get(0) + locationPoints.get(locationPoints.size() - 1);
+        this.distance = distance;
+        this.popularity = popularity;
+        this.isFavorite = isFavorite;
+        this.locationPoints = locationPoints;
+    }
 
     public String getId() {
         return id;
@@ -26,7 +35,7 @@ public class Route {
         return isFavorite;
     }
 
-    public List<String> getLocationPoints() {
+    public MyList<String> getLocationPoints() {
         return locationPoints;
     }
 
@@ -46,12 +55,21 @@ public class Route {
         this.isFavorite = isFavorite;
     }
 
-    public void setLocationPoints(List<String> locationPoints) {
+    public void setLocationPoints(MyList<String> locationPoints) {
         this.locationPoints = locationPoints;
     }
 
     public void addPopularity() {
         popularity++;
+    }
+
+    public boolean isLogical(Route route, String startPoint, String endPoint) {
+        MyList<String> locationPoints = route.getLocationPoints();
+
+        int indexOfStart = locationPoints.indexOf(startPoint);
+        int indexOfEnd = locationPoints.indexOf(endPoint);
+
+        return indexOfStart >= 0 && indexOfEnd >= 0 && indexOfStart < indexOfEnd;
     }
 
     public boolean hasLogicalOrder(String startPoint, String endPoint) {
@@ -65,16 +83,13 @@ public class Route {
         return startIndex != -1 && endIndex != -1 && startIndex < endIndex;
     }
 
-    public int getLogicalOrderDistance() {
+    public int getLogicalOrderDistance(String startsPoint, String endPoint) {
         if (locationPoints == null || locationPoints.size() < 2) {
             return 0;
         }
 
-        // int indexFirstPoint = locationPoints.indexOf(locationPoints.indexOf(0));
-        // int indexSecondPoint = locationPoints.indexOf(locationPoints.indexOf(1));
-
-        int indexFirstPoint = 0;
-        int indexSecondPoint = locationPoints.size() - 1;
+        int indexFirstPoint = locationPoints.indexOf(startsPoint);
+        int indexSecondPoint = locationPoints.indexOf(endPoint);
 
         return indexSecondPoint - indexFirstPoint;
     }
