@@ -3,58 +3,39 @@ package com.example.Comparators;
 import java.util.Comparator;
 
 import com.example.Route;
+import com.example.DataStructure.MyList;
+import com.example.DataStructure.MyMap;
 
 public class RouteComparatorSearch implements Comparator<Route> {
+    private MyMap<String, Route> map;
     private String startPoint;
     private String endPoint;
 
-    public RouteComparatorSearch(String startPoint, String endPoint) {
+    public RouteComparatorSearch(String startPoint, String endPoint, MyMap<String, Route> map) {
         this.startPoint = startPoint;
         this.endPoint = endPoint;
+        this.map = map;
     }
 
     @Override
     public int compare(Route r1, Route r2) {
-        boolean isFavorite1 = r1.isFavorite();
-        boolean isFavorite2 = r2.isFavorite();
-
-        if (isFavorite1 && !isFavorite2) {
-            return -1;
-        } else if (!isFavorite1 && isFavorite2) {
-            return 1;
-        } else {
-            boolean isLogicalOrder1 = r1.hasLogicalOrder(startPoint, endPoint);
-            boolean isLogicalOrder2 = r2.hasLogicalOrder(startPoint, endPoint);
-
-            if (isLogicalOrder1 && isLogicalOrder2) {
-                int logicalOrderDistance1 = r1.getLogicalOrderDistance();
-                int logicalOrderDistance2 = r2.getLogicalOrderDistance();
-
-                if (logicalOrderDistance1 != logicalOrderDistance2) {
-                    return Integer.compare(logicalOrderDistance1, logicalOrderDistance2);
-                } else {
-                    int popularity1 = r1.getPopularity();
-                    int popularity2 = r2.getPopularity();
-
-                    return Integer.compare(popularity2, popularity1);
-                }
-            } else if (isLogicalOrder1) {
-                return -1;
-            } else if (isLogicalOrder2) {
-                return 1;
-            } else {
-                double distance1 = r1.getDistance();
-                double distance2 = r2.getDistance();
-
-                if (distance1 != distance2) {
-                    return Double.compare(distance1, distance2);
-                } else {
-                    int popularity1 = r1.getPopularity();
-                    int popularity2 = r2.getPopularity();
-
-                    return Integer.compare(popularity2, popularity1);
-                }
-            }
+        if (r1.isFavorite() != r2.isFavorite()) {
+            return r1.isFavorite() ? -1 : 1;
         }
+        int pointSpacingFirst = countDistance(r1.getLocationPoints());
+        int pointSpacingSec = countDistance(r2.getLocationPoints());
+        if (pointSpacingFirst != pointSpacingSec) {
+            return pointSpacingFirst - pointSpacingSec;
+        }
+        if (r1.getPopularity() != r2.getPopularity()) {
+            return r2.getPopularity() - r1.getPopularity();
+        }
+        return map.getOrder(r2.getId()) - map.getOrder(r1.getId());
+    }
+
+    private int countDistance(MyList<String> list) {
+        int indexOfStart = list.indexOf(startPoint);
+        int indexOfEnd = list.indexOf(endPoint);
+        return indexOfEnd - indexOfStart - 1;
     }
 }
